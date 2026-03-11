@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  # API Server - REST endpoints + Web UI
+  api:
+    build: .
+    image: ainews-aggregator:latest
+    container_name: ainews-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite:///app/data/ainews.db
+      - MODE=api
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - ainews-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Scheduler - Background task runner
+  scheduler:
+    build: .
+    image: ainews-aggregator:latest
+    container_name: ainews-scheduler
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite:///app/data/ainews.db
+      - MODE=scheduler
+    command: python -m app.scheduler
+    networks:
+      - ainews-network
+    depends_on:
+      - api
+
+  # Telegram Bot - Message delivery
+  bot:
+    build: .
+    image: ainews-aggregator:latest
+    container_name: ainews-bot
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite:///app/data/ainews.db
+      - MODE=bot
+    command: python -m app.telegram_bot
+    networks:
+      - ainews-network
+    depends_on:
+      - api
+
+networks:
+  ainews-network:
+    driver: bridge
+
+volumes:
+  data:
