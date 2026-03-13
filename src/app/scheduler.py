@@ -156,10 +156,19 @@ class FetchScheduler:
 
 class ManualRunner:
     """Single-run mode for cron/manual execution"""
+
+    @staticmethod
+    def _ensure_db():
+        """Ensure database is initialized"""
+        from app.models.database import init_database, engine
+        if engine is None:
+            init_database()
+
     
     @staticmethod
     async def fetch_only(limit: int = 20):
         """Run fetch cycle only"""
+        ManualRunner._ensure_db()
         print("🤖 AI News Aggregator - Fetch Mode")
         
         aggregator = NewsAggregator()
@@ -174,6 +183,7 @@ class ManualRunner:
     @staticmethod
     async def deliver_only(limit: int = 5):
         """Run delivery cycle only"""
+        ManualRunner._ensure_db()
         print("📤 AI News Aggregator - Deliver Mode")
         
         aggregator = NewsAggregator()
@@ -195,6 +205,7 @@ class ManualRunner:
     @staticmethod
     async def full_cycle(fetch_limit: int = 20, deliver_limit: int = 5):
         """Run full cycle: fetch + auto-approve + deliver"""
+        ManualRunner._ensure_db()
         print("🤖 AI News Aggregator - Full Cycle Mode")
         
         # Step 1: Fetch

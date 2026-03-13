@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
     DEBUG: bool = False
     
-    # Database
-    DATABASE_URL: str = "sqlite:///data/ainews.db"
+    # Database (ABSOLUTE PATH - cron-safe)
+    DATABASE_URL: str = f"sqlite:///{PROJECT_ROOT / 'data' / 'ainews.db'}"
     
     # LLM (OpenRouter)
     LLM_API_KEY: str = "sk-test-dummy"
