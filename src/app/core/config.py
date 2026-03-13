@@ -3,16 +3,17 @@ AI News Aggregator - Configuration
 """
 
 from functools import lru_cache
+from pathlib import Path
 from typing import List, Optional
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# Get project root (2 levels up from this file)
+PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 class Settings(BaseSettings):
     """Application settings"""
-    
     model_config = SettingsConfigDict(
-        env_file='.env',
+        env_file=str(PROJECT_ROOT / '.env'),
         env_file_encoding='utf-8',
         extra='ignore'
     )
@@ -26,15 +27,15 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///data/ainews.db"
     
     # LLM (OpenRouter)
-    LLM_API_KEY: str
+    LLM_API_KEY: str = "sk-test-dummy"
     LLM_MODEL: str = "zhipu/glm-4-7"
     LLM_BASE_URL: str = "https://openrouter.ai/api/v1"
     LLM_TEMPERATURE: float = 0.3
     LLM_MAX_TOKENS: int = 500
     
     # Telegram
-    TELEGRAM_BOT_TOKEN: str
-    TELEGRAM_CHANNEL_ID: str  # @channel or -1001234567890
+    TELEGRAM_BOT_TOKEN: str = "test-token"
+    TELEGRAM_CHANNEL_ID: str = "-1001234567890"
     
     # Scheduler
     FETCH_SCHEDULE: str = "0 */3 * * *"  # Every 3 hours
@@ -60,7 +61,7 @@ class Settings(BaseSettings):
     # Categories
     CATEGORIES: List[str] = [
         "ai-general",
-        "robotics", 
+        "robotics",
         "vibecoding",
         "openclaw",
         "llm",
