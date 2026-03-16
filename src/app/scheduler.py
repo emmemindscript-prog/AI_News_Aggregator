@@ -22,6 +22,8 @@ class FetchScheduler:
     
     def __init__(self):
         self.settings = get_settings()
+        # Initialize database before creating aggregator
+        init_database(self.settings.DATABASE_URL)
         self.aggregator = NewsAggregator()
         self.telegram = TelegramDeliveryService()
         self.running = False
@@ -132,7 +134,7 @@ class FetchScheduler:
                 
             results = await self.telegram.batch_deliver(
                 articles,
-                delay_seconds=2.0
+                delay_seconds=0.5
             )
             
             self.last_deliver = datetime.utcnow()
